@@ -32,7 +32,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import {
   deleteUser,
   getUsersList,
-  resetPassword,
   UsersItem,
 } from "@/src/services/users/users.api";
 import { AddUserDialog } from "../dialogs/AddUserDialog";

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
-import AppInitializer from "@/src/routes/AppInitializer";
+import IdleLogout from "@/components/pages/crew/IdleLogout";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${montserrat.variable} antialiased`} suppressHydrationWarning>
-        <AppInitializer />
+        <IdleLogout timeout={300000} warningTime={5000} />
         {children}
         <Toaster />
       </body>

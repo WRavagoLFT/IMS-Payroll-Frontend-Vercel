@@ -1,10 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import VesselProfile from "@/components/pages/VesselProfile";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3]}>
+    <Suspense fallback={<></>}>
       <VesselProfile />
-    </AccessGuard>
+    </Suspense>
   );
 }

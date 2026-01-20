@@ -40,9 +40,12 @@ function formatDate(date: Date): string {
 
 export function generatePayrollPDF(
     payslipData: PayslipData,
+    postedValue: number,
     currentUser: string = 'admin',
     vesselFilter?: number,
 ): boolean {
+    const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+
     if (typeof window === 'undefined') {
         console.warn('PDF generation attempted during server-side rendering');
         return false;
@@ -89,8 +92,8 @@ export function generatePayrollPDF(
 
         // Set document properties for the combined PDF
         const pdfTitle = vesselsToProcess.length === 1
-            ? `Payroll Statement - ${vesselsToProcess[0].vesselName} - ${payslipData.period.formattedPeriod}`
-            : `Payroll Statement - Multiple Vessels - ${payslipData.period.formattedPeriod}`;
+            ? `Payroll Statement - ${vesselsToProcess[0].vesselName} - ${payslipData.period.formattedPeriod} - ${postedStatus}`
+            : `Payroll Statement - Multiple Vessels - ${payslipData.period.formattedPeriod} - ${postedStatus}`;
 
         doc.setProperties({
             title: pdfTitle,
@@ -119,7 +122,7 @@ export function generatePayrollPDF(
                 }
 
                 // Generate the page for this crew member
-                generateCrewPayrollPage(doc, payslipData.period, vessel, crew, currentUser);
+                generateCrewPayrollPage(doc, payslipData.period, vessel, crew, currentUser, postedStatus);
             });
         });
 
@@ -136,9 +139,9 @@ export function generatePayrollPDF(
         // Generate filename based on selected vessels
         let fileName: string;
         if (vesselsToProcess.length === 1) {
-            fileName = `Payroll_${capitalizeFirstLetter(vesselsToProcess[0].vesselName.replace(' ', '-'))}_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year}.pdf`
+            fileName = `Payroll_${capitalizeFirstLetter(vesselsToProcess[0].vesselName.replace(' ', '-'))}_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year} - ${postedStatus}.pdf`
         } else {
-            fileName = `Payroll_ALL_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year}.pdf`;
+            fileName = `Payroll_ALL_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year} - ${postedStatus}.pdf`;
         }
         
         // Save the combined PDF
@@ -170,7 +173,8 @@ function generateCrewPayrollPage(
     period: PayslipPeriod,
     vessel: Payroll,
     crewData: CrewPayroll,
-    currentUser: string
+    currentUser: string,
+    postedStatus: string
 ) {
     // Define page dimensions
     const pageWidth = doc.internal.pageSize.width;
@@ -202,13 +206,20 @@ function generateCrewPayrollPage(
     doc.text(period.formattedPeriod, pageWidth - 55, y + 9);
 
     // Add payroll statement box
-    doc.rect(pageWidth - 60, y + 15, 50, 15);
-    doc.text("PAYROLL STATEMENT", pageWidth - 55, y + 23);
+    doc.rect(pageWidth - 60, y + 15 , 50, 15);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text("PAYROLL STATEMENT", pageWidth - 55, y + 22);
+
+    // Add posted/unposted status just below with moderate spacing
+    doc.setFont('NotoSans', 'normal');
+    doc.setFontSize(7);
+    doc.text(postedStatus, pageWidth - 55, y + 26.5); // slightly below the title
 
     // Add crew and vessel information
     y += 30;
     doc.setLineWidth(0.1);
-    doc.rect(margin, y, pageWidth - margin * 2, 15);
+    doc.rect(margin, y, pageWidth - margin * 2, 18);
 
     // Crew information
     doc.setFontSize(8);

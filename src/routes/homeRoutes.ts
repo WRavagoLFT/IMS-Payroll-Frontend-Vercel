@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, Ship, CircleMinus, UserCheck, SquareUserRound, ShipWheel, Footprints, Banknote } from "lucide-react";
+import { LayoutDashboard, Users, Ship, CircleMinus, UserCheck, SquareUserRound, Footprints, Banknote, Undo2 } from "lucide-react";
 import { RiCoinsFill } from "react-icons/ri";
 import { TbCurrencyDollarOff } from "react-icons/tb";
 import { BiReceipt } from "react-icons/bi";
@@ -145,6 +145,13 @@ export const getHomeRoutes = (pathname: string, userType: number) => {
       icon: UserCheck,
       href: "/home/manage-users",
       active: pathname.startsWith("/home/manage-users"),
+      allowedUserTypes: [1],
+    },
+    {
+      label: "Unpost Payroll",
+      icon: Undo2,
+      href: "/home/payroll-unposting",
+      active: pathname.startsWith("/home/payroll-unposting"),
       allowedUserTypes: [1],
     },
   ];

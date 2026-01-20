@@ -1,13 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
-import AllotmentPayslip from "@/components/pages/allotment_payroll/AllotmentPayslip";
 import { Suspense } from "react";
+import AllotmentPayslip from "@/components/pages/allotment_payroll/AllotmentPayslip";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3, 4]}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <AllotmentPayslip />;
-      </Suspense>
-    </AccessGuard>
+    <Suspense fallback={<></>}>
+      <AllotmentPayslip />
+    </Suspense>
   );
 }

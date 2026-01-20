@@ -1,15 +1,10 @@
-"use client";
-
-import AccessGuard from "@/components/pages/AccessGuard";
-import DeductionRegister from "@/components/pages/allotment_payroll/DeductionRegister";
 import { Suspense } from "react";
+import DeductionRegister from "@/components/pages/allotment_payroll/DeductionRegister";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3, 4]}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <DeductionRegister />
-      </Suspense>
-    </AccessGuard>
+    <Suspense fallback={<></>}>
+      <DeductionRegister />
+    </Suspense>
   );
 }

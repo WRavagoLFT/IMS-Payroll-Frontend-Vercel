@@ -83,8 +83,11 @@ function calculateVesselSubtotals(crew: otherDeductionsCrew[], vesselName: strin
 export function generateOtherDeductionsReportPDF(
     data: OtherDeductionsResponse,
     dateGenerated: Date,
-    mode: 'all' | 'vessel' = 'vessel'
+    mode: 'all' | 'vessel' = 'vessel',
+    postedValue: number
 ): boolean {
+    const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+
     if (typeof window === 'undefined') {
         console.warn('PDF generation attempted during server-side rendering');
         return false;
@@ -92,9 +95,9 @@ export function generateOtherDeductionsReportPDF(
 
     if (!data.success || !data.data || data.data.Crew.length === 0) {
         toast({
-          title: "Error",
-          description: 'Invalid or empty data for date.',
-          variant: "destructive",
+            title: "Error",
+            description: 'Invalid or empty data for date.',
+            variant: "destructive",
         });
         return false;
     }
@@ -125,7 +128,7 @@ export function generateOtherDeductionsReportPDF(
         }
 
         doc.setProperties({
-            title: `Crew Deductions Report - ${period.month}/${period.year}`,
+            title: `Crew Deductions Report - ${period.month}/${period.year} - ${postedStatus}`,
             subject: `Crew Deductions Report - ${period.month}/${period.year}`,
             author: 'IMS Philippines Maritime Corp.',
             creator: 'jsPDF'
@@ -163,7 +166,7 @@ export function generateOtherDeductionsReportPDF(
         // NEW FUNCTION: Draw vessel sub-total row
         const drawVesselSubtotalRow = (vesselName: string) => {
             const subtotals = calculateVesselSubtotals(data.data.Crew, vesselName);
-            
+
             if (currentY + rowHeight * 2 > pageHeight - margins.bottom - 20) {
                 doc.addPage();
                 currentY = margins.top;
@@ -179,7 +182,7 @@ export function generateOtherDeductionsReportPDF(
             // Draw borders with light gray background
             doc.setFillColor(240, 240, 240);
             doc.rect(margins.left, currentY, pageWidth - margins.right - margins.left, rowHeight, 'F');
-            
+
             doc.line(margins.left, currentY, margins.left, currentY + rowHeight);
             doc.line(pageWidth - margins.right, currentY, pageWidth - margins.right, currentY + rowHeight);
             doc.line(margins.left, currentY, pageWidth - margins.right, currentY);
@@ -209,7 +212,7 @@ export function generateOtherDeductionsReportPDF(
 
         const drawTotalsRow = () => {
             const totals = calculateTotals(data.data.Crew);
-            
+
             if (currentY + rowHeight * 2 > pageHeight - margins.bottom - 20) {
                 doc.addPage();
                 currentY = margins.top;
@@ -255,7 +258,7 @@ export function generateOtherDeductionsReportPDF(
             doc.setDrawColor(0);
 
             doc.rect(margins.left, currentY, pageWidth - margins.right - 10, 40);
-            
+
             doc.addImage(logoBase64Image, 'PNG', margins.left, currentY, 20, 20);
 
             doc.setFontSize(10);
@@ -285,7 +288,7 @@ export function generateOtherDeductionsReportPDF(
             const vesselInfoY = currentY;
             doc.line(margins.left, vesselInfoY, pageWidth - margins.right, vesselInfoY);
             doc.setFontSize(8);
-            
+
             doc.setTextColor(150, 150, 150);
             doc.setFont('helvetica', 'italic');
             doc.text("VESSEL", margins.left + 2, vesselInfoY + 4.5);
@@ -306,11 +309,24 @@ export function generateOtherDeductionsReportPDF(
                 { align: 'right' }
             );
 
+            // --- NEW: Posted/Unposted and Date justified ---
+            const leftPadding = 3; // space from left margin
+            const rightPadding = 5; // space from right margin
+
+            doc.setFont('NotoSans', 'normal');
+            doc.setFontSize(8);
+            doc.text(
+                postedStatus, // your posted/unposted value
+                margins.left + leftPadding,
+                vesselInfoY + 16.5
+            );
+
             doc.setFont('helvetica', 'italic');
+            doc.setFontSize(8);
             doc.text(
                 format(dateGenerated, 'yyyy-MM-dd HH:mm aa'),
-                margins.left + companyColWidth + middleColWidth + rightColWidth - 5,
-                vesselInfoY + 16,
+                pageWidth - margins.right - rightPadding,
+                vesselInfoY + 16.5,
                 { align: 'right' }
             );
 
@@ -328,7 +344,7 @@ export function generateOtherDeductionsReportPDF(
         const drawTableHeader = () => {
             doc.setFontSize(8);
             doc.setFont('helvetica', 'bold');
-            
+
             doc.line(margins.left, currentY, pageWidth - margins.right, currentY);
             doc.line(margins.left, currentY + tableHeaderHeight, pageWidth - margins.right, currentY + tableHeaderHeight);
 
@@ -339,7 +355,7 @@ export function generateOtherDeductionsReportPDF(
             headers.forEach((header, index) => {
                 const colX = colPositions[index];
                 const colWidth = colWidths[index];
-                if(header.includes("Amount")) {
+                if (header.includes("Amount")) {
                     doc.text(header, colX + colWidth - 5, currentY + tableHeaderHeight / 2 + 1, { align: 'right' })
                 }
                 else {
@@ -392,13 +408,13 @@ export function generateOtherDeductionsReportPDF(
             ];
 
             columnKeys.forEach((key, i) => {
-                if(i === 1) {
+                if (i === 1) {
                     const crewName = `${crew.LastName}, ${crew.FirstName} ${crew.MiddleName ? crew.MiddleName[0] + '.' : ''}`;
-                    doc.text(crewName, colPositions[i] + 5, currentY + rowHeight / 2 + 1, {align: 'left'});
+                    doc.text(crewName, colPositions[i] + 5, currentY + rowHeight / 2 + 1, { align: 'left' });
                 }
                 else if (i === 2) {
                     let value = 0
-                    if(crew.Currency === 2){
+                    if (crew.Currency === 2) {
                         value = crew.OriginalAmount
                     }
                     else {
@@ -406,7 +422,7 @@ export function generateOtherDeductionsReportPDF(
                     }
 
                     let positionIdx = 0
-                    if(crew.DeductionName.toLowerCase().includes("cash advance")){
+                    if (crew.DeductionName.toLowerCase().includes("cash advance")) {
                         positionIdx = 2
                     }
                     else {
@@ -414,28 +430,28 @@ export function generateOtherDeductionsReportPDF(
                     }
 
                     doc.setFont('NotoSans', 'normal');
-                    doc.text(`$${formatCurrency(value)}`, colPositions[positionIdx] + colWidths[i] - 5, currentY + rowHeight / 2 + 1, {align: 'right'});
+                    doc.text(`$${formatCurrency(value)}`, colPositions[positionIdx] + colWidths[i] - 5, currentY + rowHeight / 2 + 1, { align: 'right' });
                     doc.setFont('helvetica', 'normal');
                 }
-                else if(i == 3){
+                else if (i == 3) {
                     let positionIdx = 0
-                    if(!crew.DeductionName.toLowerCase().includes("cash advance")){
+                    if (!crew.DeductionName.toLowerCase().includes("cash advance")) {
                         positionIdx = 4
-                        doc.text(crew[key as keyof otherDeductionsCrew]?.toString() || '', colPositions[positionIdx] + 5, currentY + rowHeight / 2 + 1, {align: 'left'});
+                        doc.text(crew[key as keyof otherDeductionsCrew]?.toString() || '', colPositions[positionIdx] + 5, currentY + rowHeight / 2 + 1, { align: 'left' });
                     }
                 }
-                else if(i == 4){
+                else if (i == 4) {
                     let positionIdx = 0
-                    if(crew.DeductionName.toLowerCase().includes("cash advance")){
+                    if (crew.DeductionName.toLowerCase().includes("cash advance")) {
                         positionIdx = 3
                     }
                     else {
                         positionIdx = 6
                     }
-                    doc.text(crew[key as keyof otherDeductionsCrew]?.toString() || '', colPositions[positionIdx] + 5, currentY + rowHeight / 2 + 1, {align: 'left'});
+                    doc.text(crew[key as keyof otherDeductionsCrew]?.toString() || '', colPositions[positionIdx] + 5, currentY + rowHeight / 2 + 1, { align: 'left' });
                 }
                 else {
-                    doc.text(crew[key as keyof otherDeductionsCrew]?.toString() || '', colPositions[i] + 5, currentY + rowHeight / 2 + 1, {align: 'left'});
+                    doc.text(crew[key as keyof otherDeductionsCrew]?.toString() || '', colPositions[i] + 5, currentY + rowHeight / 2 + 1, { align: 'left' });
                 }
             });
 
@@ -454,21 +470,21 @@ export function generateOtherDeductionsReportPDF(
         const totalPages = doc.internal.pages.length - 1;
         for (let i = 1; i <= totalPages; i++) {
             doc.setPage(i);
-            
+
             doc.rect(margins.left, pageHeight - margins.bottom - 10, mainTableWidth, 10);
             doc.setFont('helvetica', 'italic');
             doc.setFontSize(9);
             doc.text(
-                `Page ${i} out of ${totalPages}`, 
-                pageWidth - margins.right - 5, 
-                pageHeight - margins.bottom - 4, 
+                `Page ${i} out of ${totalPages}`,
+                pageWidth - margins.right - 5,
+                pageHeight - margins.bottom - 4,
                 { align: 'right' }
             );
         }
 
         const fileName = mode === 'vessel' ?
-        `CrewDeductions_${capitalizeFirstLetter(data.data.VesselName?.replace(' ', '-') || "")}_${capitalizeFirstLetter(period.month)}-${period.year}.pdf` : 
-        `CrewDeductions_ALL_${capitalizeFirstLetter(period.month)}-${period.year}.pdf`;
+            `CrewDeductions_${capitalizeFirstLetter(data.data.VesselName?.replace(' ', '-') || "")}_${capitalizeFirstLetter(period.month)}-${period.year} - ${postedStatus}.pdf` :
+            `CrewDeductions_ALL_${capitalizeFirstLetter(period.month)}-${period.year} - ${postedStatus}.pdf`;
         doc.save(fileName);
 
         return true;
@@ -478,11 +494,12 @@ export function generateOtherDeductionsReportPDF(
     }
 }
 
-export function generateOtherDeductionsReport(data: OtherDeductionsResponse, dateGenerated: Date, mode: 'all' | 'vessel' = 'vessel'): boolean {
+export function generateOtherDeductionsReport(data: OtherDeductionsResponse, dateGenerated: Date, mode: 'all' | 'vessel' = 'vessel', postedValue: number): boolean {
     return generateOtherDeductionsReportPDF(
         data,
         dateGenerated,
-        mode
+        mode,
+        postedValue
     );
 }
 

@@ -54,7 +54,6 @@ import {
   getDeductionEntries,
   DeductionEntries as DeductionEntriesType,
   getCrewDeductionList,
-  updateCrewDeductionEntry,
   addHDMFUpgrade,
   getCrewHDMFUpgrade,
   getCrewPhilhealth,

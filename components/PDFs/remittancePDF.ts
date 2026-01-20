@@ -215,7 +215,7 @@ export function generateCrewRemittanceReportPDF(
         };
 
         const drawTotalsRow = () => {
-            console.log("drawing totals")
+            //console.log("drawing totals")
             const totals = calculateTotals(data.data.Crew);
             
             if (currentY + rowHeight * 2 > pageHeight - margins.bottom - 20) {
@@ -238,7 +238,7 @@ export function generateCrewRemittanceReportPDF(
 
             if (totals.cashAdvTotal > 0) {
                 doc.setFont('NotoSans', 'bold');
-                console.log("drawing cash advance total", totals.cashAdvTotal)
+                //console.log("drawing cash advance total", totals.cashAdvTotal)
                 doc.text(`$${formatCurrency(totals.cashAdvTotal)}`, colPositions[2] + colWidths[2] - 5, currentY + rowHeight / 2 + 1, { align: 'right' });
                 doc.setFont('helvetica', 'bold');
             }
@@ -368,10 +368,10 @@ export function generateCrewRemittanceReportPDF(
         let currentVessel = sortedCrew[0]?.VesselName || '';
 
         sortedCrew.forEach((crew, crewIndex) => {
-            console.log("current", crew)
+            //console.log("current", crew)
             // Check if vessel changed - if so, draw sub-total for previous vessel
             if (crew.VesselName !== currentVessel && currentVessel) {
-                console.log("previous vessel", crew)
+                //console.log("previous vessel", crew)
                 drawVesselSubtotalRow(currentVessel);
                 currentVessel = crew.VesselName;
             }
@@ -382,7 +382,7 @@ export function generateCrewRemittanceReportPDF(
             if (currentY + totalEntryHeight > pageHeight - margins.bottom - 20) {
                 doc.addPage();
                 currentY = margins.top;
-                console.log("new page", crew)
+                //console.log("new page", crew)
                 drawPageHeader();
                 drawTableHeader();
             }
@@ -403,28 +403,28 @@ export function generateCrewRemittanceReportPDF(
                 "Remarks",
             ];
 
-            console.log("rendering row", crew)
+            //console.log("rendering row", crew)
 
             columnKeys.forEach((key, i) => {
                 if(i === 1) {
-                    console.log(" Crew Name")
+                    //console.log(" Crew Name")
 
                     const crewName = `${crew.LastName}, ${crew.FirstName} ${crew.MiddleName ? crew.MiddleName[0] + '.' : ''}`;
-                    console.log(crewName)
+                    //console.log(crewName)
                     doc.text(crewName, colPositions[i] + 5, currentY + rowHeight / 2 + 1, {align: 'left'});
                 }
                 else if (i === 2) {
-                    console.log(" Amount ")
+                    //console.log(" Amount ")
                     let value = crew.Amount
 
                     doc.setFont('NotoSans', 'normal');
-                    console.log(`$${formatCurrency(value)}`)
+                    //console.log(`$${formatCurrency(value)}`)
                     doc.text(`$${formatCurrency(value)}`, colPositions[i] + colWidths[i] - 5, currentY + rowHeight / 2 + 1, {align: 'right'});
                     doc.setFont('helvetica', 'normal');
                 }
                 else {
-                    console.log(" others ")
-                    console.log(crew[key as keyof crewRemittanceRegisterCrew])
+                    //console.log(" others ")
+                    //console.log(crew[key as keyof crewRemittanceRegisterCrew])
                     doc.text(crew[key as keyof crewRemittanceRegisterCrew]?.toString() || '', colPositions[i] + 5, currentY + rowHeight / 2 + 1, {align: 'left'});
                 }
             });
@@ -435,13 +435,13 @@ export function generateCrewRemittanceReportPDF(
 
             // If this is the last crew member, draw sub-total for their vessel
             if (crewIndex === sortedCrew.length - 1) {
-                console.log("last vessel", crew)
+                //console.log("last vessel", crew)
                 drawVesselSubtotalRow(crew.VesselName);
-                console.log("drew last vessel subtotal success")
+                //console.log("drew last vessel subtotal success")
             }
         });
 
-        console.log("drawing totals")
+        //console.log("drawing totals")
         drawTotalsRow();
 
         const totalPages = doc.internal.pages.length - 1;
@@ -451,8 +451,8 @@ export function generateCrewRemittanceReportPDF(
             doc.rect(margins.left, pageHeight - margins.bottom - 10, mainTableWidth, 10);
             doc.setFont('helvetica', 'italic');
             doc.setFontSize(9);
-            console.log(`Page ${i} out of ${totalPages}`)
-            console.log('drawing page number')
+            //console.log(`Page ${i} out of ${totalPages}`)
+            //console.log('drawing page number')
             doc.text(
                 `Page ${i} out of ${totalPages}`, 
                 pageWidth - margins.right - 5, 

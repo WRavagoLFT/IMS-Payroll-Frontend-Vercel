@@ -47,8 +47,11 @@ function calculateTotals(crew: otherDeductionsCrew[]): {
 export function generateOtherDeductionsExcel(
   data: OtherDeductionsResponse,
   dateGenerated: Date,
-  mode: "all" | "vessel" = "vessel"
+  mode: "all" | "vessel" = "vessel",
+  postedValue: number
 ): boolean {
+  const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+  
   if (typeof window === "undefined") {
     console.warn("Excel generation attempted during server-side rendering");
     return false;
@@ -76,7 +79,7 @@ export function generateOtherDeductionsExcel(
       "",
       "",
       "",
-      "Crew Deductions Report",
+      `Crew Deductions Report - ${postedStatus}`,
       `${period.month} ${period.year}`,
     ]);
     sheetData.push([]);
@@ -192,10 +195,10 @@ export function generateOtherDeductionsExcel(
       mode === "vessel"
         ? `CrewDeductions_${capitalizeFirstLetter(
             vesselName.replace(" ", "-")
-          )}_${capitalizeFirstLetter(period.month)}-${period.year}.xlsx`
+          )}_${capitalizeFirstLetter(period.month)}-${period.year} - ${postedStatus}.xlsx`
         : `CrewDeductions_ALL_${capitalizeFirstLetter(
             period.month
-          )}-${period.year}.xlsx`;
+          )}-${period.year} - ${postedStatus}.xlsx`;
 
     XLSX.writeFile(wb, fileName);
 

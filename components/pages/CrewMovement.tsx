@@ -29,7 +29,6 @@ import { generateMovementHistoryExcel } from "../Excels/movementHistoryExcel";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { lastDayOfMonth, set } from "date-fns";
 import { toast } from "../ui/use-toast";
-import { generateMovementHistoryPDFV2 } from "../PDFs/movmentHistoryPDFV2";
 import { generateMovementHistoryExcelV2 } from "../Excels/movmentHistoryExcelV2";
 import { generateMovementHistoryByVesselPDF } from "../PDFs/movementHistoryByVesselPDF";
 

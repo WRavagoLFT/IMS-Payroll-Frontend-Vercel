@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useAuth } from "@/src/store/useAuthStore";
+import { useEffect, useState } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card } from "../ui/card";
@@ -14,11 +13,12 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "@/components/ui/input";
-import { Eye, EyeOff, Pencil, Save } from "lucide-react";
+import { Eye, EyeOff, Save } from "lucide-react";
 import { updatePassword } from "@/src/services/users/users.api";
 import { toast } from "../ui/use-toast";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { getCurrentUser, UserItem } from "@/src/services/auth/auth.api";
 
 type UpdatePasswordForm = {
   oldPassword: string;
@@ -27,10 +27,34 @@ type UpdatePasswordForm = {
 };
 
 export default function UserProfile() {
-  const { user } = useAuth();
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<UserItem | null>(null);
+
+  const fetchUser = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getCurrentUser();
+      if (response.success) {
+        setUser(response.data);
+      } else {
+        setError(response.message || "Failed to fetch user data");
+      }
+    } catch (err) {
+      setError("An error occurred while fetching user data");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
 
 const passwordSchema = z
   .object({
@@ -164,7 +188,7 @@ const passwordSchema = z
                   {/* Change Password Card */}
                   <div className="md:col-span-3">
                     <Card className="h-auto flex flex-col p-6 rounded-2xl space-y-4">
-                      <h2 className="text-xl font-semibold text-primary mb-2">
+                      <h2 className="text-xl font-semibold text-primary my-2">
                         Change Password
                       </h2>
 

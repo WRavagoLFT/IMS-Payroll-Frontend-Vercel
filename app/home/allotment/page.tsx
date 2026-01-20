@@ -1,10 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import Allotment from "@/components/pages/Allotment";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3, 4]}>
+    <Suspense fallback={<></>}>
       <Allotment />
-    </AccessGuard>
+    </Suspense>
   );
 }

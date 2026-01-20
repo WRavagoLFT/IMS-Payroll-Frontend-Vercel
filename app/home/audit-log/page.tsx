@@ -1,12 +1,10 @@
-"use client";
-
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import AuditLog from "@/components/pages/allotment_payroll/AuditLog";
 
 export default function Page() {
   return (
-    <AccessGuard allowedTypes={[1]}>
+    <Suspense fallback={<></>}>
       <AuditLog/>
-    </AccessGuard>
+    </Suspense>
   );
 }

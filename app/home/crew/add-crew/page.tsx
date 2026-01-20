@@ -1,10 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import AddCrew from "@/components/pages/AddCrew";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3]}>
+    <Suspense fallback={<></>}>
       <AddCrew />
-    </AccessGuard>
+    </Suspense>
   )
 }

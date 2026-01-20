@@ -1,13 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
-import CrewMovementCrew from "@/components/pages/CrewMovementList";
 import { Suspense } from "react";
+import CrewMovementCrew from "@/components/pages/CrewMovementList";
 
-export default function VesselCrewListPage() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3]}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <CrewMovementCrew />
-      </Suspense>
-    </AccessGuard>
+    <Suspense fallback={<></>}>
+      <CrewMovementCrew />
+    </Suspense>
   );
 }

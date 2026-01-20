@@ -26,7 +26,7 @@ export interface DeductionRegisterCrew {
     Deduction: number;
     Deductions: Deductions[];
 }
-export interface DeductionRegisterData {
+export interface DeductionRegisterVesselData {
     VesselID: number;
     VesselName: string;
     VesselCode: string;
@@ -34,6 +34,11 @@ export interface DeductionRegisterData {
     Principal: string;
     IsActive: number;
     Crew: DeductionRegisterCrew[];
+}
+
+export interface DeductionRegisterData {
+    ExchangeRate: number,
+    Vessels: DeductionRegisterVesselData[]
 }
 
 export interface AllotmentRegisterResponse {
@@ -76,7 +81,7 @@ function getMonthName(monthNum: number): string {
     return months[monthNum - 1];
 }
 
-function calculateVesselDeductionTotals(vessel: DeductionRegisterData): { [key: string]: number } {
+function calculateVesselDeductionTotals(vessel: DeductionRegisterVesselData): { [key: string]: number } {
     // Define the standard deduction types
     const standardDeductions = [
         'SSS Premium',
@@ -120,17 +125,20 @@ function calculateVesselDeductionTotals(vessel: DeductionRegisterData): { [key: 
  * @returns boolean indicating if PDF generation was successful
  */
 export function generateDeductionAllotmentV2Register(
-    vesselData: DeductionRegisterData[],
+    vesselData: DeductionRegisterData,
     month: number,
     year: number,
     exchangeRate: number,
+    postedValue: number
 ): boolean {
+    const postedStatus = postedValue === 1? "Posted" : "Unposted";
+
     if (typeof window === 'undefined') {
         console.warn('PDF generation attempted during server-side rendering');
         return false;
     }
 
-    if (!vesselData || vesselData.length === 0) {
+    if (!vesselData || vesselData.Vessels.length === 0) {
         console.error('Invalid or empty data for allotment register');
         return false;
     }
@@ -158,7 +166,7 @@ export function generateDeductionAllotmentV2Register(
 
         // Set document properties
         doc.setProperties({
-            title: `Allotment Deduction Register - ${month} ${year}`,
+            title: `Allotment Deduction Register - ${month} ${year} - ${postedStatus}`,
             subject: `Alltoment Deduction Register`,
             author: 'IMS Philippines Maritime Corp.',
             creator: 'jsPDF'
@@ -207,7 +215,7 @@ export function generateDeductionAllotmentV2Register(
         let isFirstPage = true;
 
         // Add this function to draw the summary section
-        function drawVesselSummary(doc: jsPDF, vessel: DeductionRegisterData, currentY: number, margins: any, pageWidth: number, colPositions: number[], colWidths: number[], scaleFactor: number): number {
+        function drawVesselSummary(doc: jsPDF, vessel: DeductionRegisterVesselData, currentY: number, margins: any, pageWidth: number, colPositions: number[], colWidths: number[], scaleFactor: number): number {
             const totals = calculateVesselDeductionTotals(vessel);
             
             // Check if we have any totals to display
@@ -312,7 +320,7 @@ export function generateDeductionAllotmentV2Register(
         }
 
         // Function to add headers to a page
-        function addPageHeaders(vessel: DeductionRegisterData, withTableHeader: boolean = true): void {
+        function addPageHeaders(vessel: DeductionRegisterVesselData, withTableHeader: boolean = true): void {
             // If not the first page, add a new page
             if (!isFirstPage) {
                 doc.addPage();
@@ -375,6 +383,8 @@ export function generateDeductionAllotmentV2Register(
             // Vertical line for right column
             doc.setDrawColor(0);
             doc.setLineWidth(0.1);
+            doc.setFont('NotoSans', 'normal');
+            doc.text(`${postedStatus}`, margins.left + 2, vesselInfoY + 13.5);
             doc.line(margins.left + companyColWidth + middleColWidth, vesselInfoY, margins.left + companyColWidth + middleColWidth, vesselInfoY + vesselInfoHeight);
 
             // IMPORTANT: Add horizontal line between exchange rate and date
@@ -383,7 +393,7 @@ export function generateDeductionAllotmentV2Register(
             // Add exchange rate and date
             doc.setFontSize(7);
             doc.setFont('NotoSans', 'normal');
-            doc.text(`EXCHANGE RATE: USD 1.00 = PHP ${vesselData[0].Crew[0].Deductions[0].ExchangeRate.toFixed(2)}`, margins.left + companyColWidth + middleColWidth + rightColWidth - 5, vesselInfoY + 5, { align: 'right' });
+            doc.text(`EXCHANGE RATE: USD 1.00 = PHP ${vesselData.ExchangeRate.toFixed(2)}`, margins.left + companyColWidth + middleColWidth + rightColWidth - 5, vesselInfoY + 5, { align: 'right' });
             doc.text(getFormattedDate(), margins.left + companyColWidth + middleColWidth + rightColWidth - 5, vesselInfoY + 13, { align: 'right' });
 
             currentY += vesselInfoHeight;
@@ -443,7 +453,7 @@ export function generateDeductionAllotmentV2Register(
         }
 
         // Process each vessel - without adding vessel header between vessels
-        vesselData.forEach((vessel, vesselIndex) => {
+        vesselData.Vessels.forEach((vessel, vesselIndex) => {
             // On new vessel, always start with headers
             if (vesselIndex === 0 || !isFirstPage) {
                 addPageHeaders(vessel);
@@ -568,7 +578,7 @@ export function generateDeductionAllotmentV2Register(
             currentY = y;
 
             // If there are more vessels, prepare for the next vessel
-            if (vesselIndex < vesselData.length - 1) {
+            if (vesselIndex < vesselData.Vessels.length - 1) {
                 isFirstPage = false;
             }
         });
@@ -584,9 +594,9 @@ export function generateDeductionAllotmentV2Register(
             addPageFooter(i, totalPages)
         }
         // Save the final PDF
-        const fileName = vesselData.length > 1
-                    ? `Deduction_ALL_${capitalizeFirstLetter(getMonthName(month))}-${year}.pdf`
-                    : `Deduction_${capitalizeFirstLetter(vesselData[0].VesselName.replace(' ', '-'))}_${capitalizeFirstLetter(getMonthName(month))}-${year}.pdf`;
+        const fileName = vesselData.Vessels.length > 1
+                    ? `Deduction_ALL_${capitalizeFirstLetter(getMonthName(month))}-${year} - ${postedStatus}.pdf`
+                    : `Deduction_${capitalizeFirstLetter(vesselData.Vessels[0].VesselName.replace(' ', '-'))}_${capitalizeFirstLetter(getMonthName(month))}-${year}.pdf`;
         doc.save(fileName)
         return true;
     } catch (error) {
@@ -595,26 +605,13 @@ export function generateDeductionAllotmentV2Register(
     }
 }
 
-// Helper function to convert data URI to Blob
-function dataURItoBlob(dataURI: string): Blob {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-
-    for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-
-    return new Blob([ab], { type: mimeString });
-}
-
 // Example usage function
 export function generateDeductionAllotmentV2PDF(
-    vesselData: DeductionRegisterData[],
+    vesselData: DeductionRegisterData,
     month: number,
     year: number,
     exchangeRate: number = 57.53,
+    postedValue: number
 ): void {
-    generateDeductionAllotmentV2Register(vesselData, month, year, exchangeRate);
+    generateDeductionAllotmentV2Register(vesselData, month, year, exchangeRate, postedValue);
 }

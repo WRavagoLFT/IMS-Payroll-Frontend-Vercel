@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -27,7 +29,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { addVessel } from "@/src/services/vessel/vessel.api";
 import { VesselItem } from "@/src/services/vessel/vessel.api";
 import { useToast } from "@/components/ui/use-toast";

@@ -30,7 +30,7 @@ import { useDebounce } from "@/lib/useDebounce";
 import { toast } from "../ui/use-toast";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { generateAllotmentPDF } from "../PDFs/payrollAllotmentRegisterPDF";
-import { DeductionResponse, getAllHDMFDeductionList, getAllPhilhealthDeductionList, getAllSSSDeductionList, HDMFDeductionCrew, PhilhealthDeductionCrew, SSSDeductionCrew } from "@/src/services/deduction/governmentReports.api";
+import { getAllHDMFDeductionList, getAllPhilhealthDeductionList, getAllSSSDeductionList, HDMFDeductionCrew, PhilhealthDeductionCrew, SSSDeductionCrew } from "@/src/services/deduction/governmentReports.api";
 import generateSSSRegister from "../PDFs/deductionsSSSRegister";
 import generatePHRegister from "../PDFs/deductionsPHRegister";
 import { format } from "date-fns";
@@ -82,23 +82,18 @@ export default function GovernmentReports() {
   const [forexRate, setForexRate] = useState<number>(0);
   const [printLoading, setPrintLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(false);
-
   const searchParams = useSearchParams();
   const month = searchParams.get("month");
   const year = searchParams.get("year");
-
   const [monthFilter, setMonthFilter] = useState(
     month || (new Date().getMonth() + 1).toString()
   );
   const [yearFilter, setYearFilter] = useState(
    year || new Date().getFullYear().toString()
   );
-
   const pathname = usePathname();
   const router = useRouter();
-
   const formatNumber = (value: number) => value?.toFixed(2);
-
   const monthNames = [
     "January",
     "February",
@@ -371,7 +366,8 @@ export default function GovernmentReports() {
         allotmentRegisterData,
         monthNames[Number(month)] ? monthNames[Number(month) - 1] : "ALL",
         year ? parseInt(year) : new Date().getFullYear(),
-        Number(forexRate)
+        Number(forexRate),
+        1 // posted
       );
     } else {
       console.error("No allotment register data available");

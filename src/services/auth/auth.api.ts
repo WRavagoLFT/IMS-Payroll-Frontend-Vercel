@@ -11,6 +11,7 @@ export interface LoginResponse {
   data: {
     token: string;
     email: string;
+    userType: number;
   };
   message: string;
 }
@@ -24,7 +25,20 @@ export const logoutUser = async (): Promise<void> => {
   await axiosInstance.delete("/auth/logout");
 };
 
-export const getCurrentUser = async (): Promise<{ Email: string; UserType: number }> => {
+export interface UserItem {
+    Email: string
+    FirstName: string
+    LastName: string
+    UserType: number
+    UserTypeName: string 
+}
+
+
+export const getCurrentUser = async (): Promise<{
+  success: boolean;
+  data: UserItem | null;
+  message?: string;
+}> => {
   const response = await axiosInstance.get("/auth/current-user");
-  return response.data.data;
+  return response.data;
 };

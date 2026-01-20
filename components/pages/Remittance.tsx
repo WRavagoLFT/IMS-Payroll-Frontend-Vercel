@@ -57,10 +57,10 @@ export default function Remittance() {
   
       if(response.success) {
         generateCrewRemittanceReport(response, today)
-        console.log(response)
+        //console.log(response)
       }
       else {
-        console.log("No other deduction data found")
+        console.error("No other deduction data found")
       }
       setIsDataLoading(false)
     }

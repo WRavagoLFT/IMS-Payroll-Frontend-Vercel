@@ -1,10 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import LoginHistory from "@/components/pages/LoginHistory";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[1]}>
+    <Suspense fallback={<></>}>
       <LoginHistory />
-    </AccessGuard>
+    </Suspense>
   );
 }

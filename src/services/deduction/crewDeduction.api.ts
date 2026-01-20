@@ -158,6 +158,29 @@ export const getCrewSSS = async (crewCode: string, year: number): Promise<sssDed
   return response.data;
 }
 
+// export interface otherDeductionsCrew {
+//   CrewID: number;
+//   CrewName: string;
+//   Rank: string;
+//   Salary: number;
+//   Allotment: number;
+//   Gross: number;
+//   Deduction: number;
+//   Deductions: DeductionItem[];
+// }
+
+// export interface otherDeductionsData {
+//   ExchangeRate: number,
+//   VesselName: string | undefined,
+//   Crew: otherDeductionsCrew[],
+// }
+
+// export interface otherDeductionsResponse {
+//   success: boolean;
+//   data: otherDeductionsData;
+//   message: string;
+// }
+
 export interface otherDeductionsCrew {
   CrewID: number,
   CrewCode: string,
@@ -187,13 +210,21 @@ export interface otherDeductionsResponse {
   message: string;
 }
 
-export const otherDeductions = async (year: number, month: number, vesselId?: number): Promise<otherDeductionsResponse> => {
-  if(vesselId){
-    const response = await axiosInstance.get<otherDeductionsResponse>(`/deductions/other-deductions/${vesselId}/${year}/${month}`);
-    return response.data;
+export const otherDeductions = async (
+  year: number,
+  month: number,
+  vesselId?: number,
+  posted?: number
+): Promise<otherDeductionsResponse> => {
+  let url = vesselId
+    ? `/deductions/other-deductions/${vesselId}/${year}/${month}`
+    : `/deductions/other-deductions/${year}/${month}`;
+
+  if (posted !== undefined) {
+    // Add posted as a query parameter
+    url += `?posted=${posted}`;
   }
-  else {
-    const response = await axiosInstance.get<otherDeductionsResponse>(`/deductions/other-deductions/${year}/${month}`);
-    return response.data;
-  }
-}
+
+  const response = await axiosInstance.get<otherDeductionsResponse>(url);
+  return response.data;
+};

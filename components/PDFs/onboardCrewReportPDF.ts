@@ -77,7 +77,7 @@ export function generateOnboardCrewReportPDF(
 
         // Create a new PDF document in landscape orientation with LEGAL size
         const doc = new jsPDF({
-            orientation: "landscape",
+            orientation: "portrait",
             unit: "mm",
             format: "letter"
         });
@@ -115,9 +115,9 @@ export function generateOnboardCrewReportPDF(
             mainTableWidth * 0.05, // No.
             mainTableWidth * 0.15, // Rank
             mainTableWidth * 0.45, // Crew Name
-            mainTableWidth * 0.10, // Join Date
-            mainTableWidth * 0.10, // Birthday
-            mainTableWidth * 0.15, // Seamans Book
+            mainTableWidth * 0.175, // Join Date
+            mainTableWidth * 0.175, // Birthday
+            //mainTableWidth * 0.15, // Seamans Book
         ];
 
         // Calculate column positions
@@ -242,7 +242,7 @@ export function generateOnboardCrewReportPDF(
             doc.line(pageWidth - margins.right, currentY, pageWidth - margins.right, currentY + tableHeaderHeight); // Right border
 
             // Add header text
-            const headers = ["", "RANK", "CREW NAME", "JOINED DATE", "BIRTHDAY", "SEAMAN'S BOOK" ];
+            const headers = ["", "RANK", "CREW NAME", "JOINED DATE", "BIRTHDAY"];
             headers.forEach((header, index) => {
                 const colX = colPositions[index];
                 const colWidth = colWidths[index];
@@ -280,9 +280,9 @@ export function generateOnboardCrewReportPDF(
                 doc.setFont('helvetica', 'normal');
     
                 // Draw horizontal line at the top of crew row
-                if (crewIndex > 0 || vesselIndex > 0) {
-                    doc.line(margins.left, currentY, pageWidth - margins.right, currentY);
-                }
+                // if (crewIndex > 0 || vesselIndex > 0) {
+                //     //doc.line(margins.left, currentY, pageWidth - margins.right, currentY);
+                // }
     
                 // Draw left and right borders only
                 doc.line(margins.left, currentY, margins.left, currentY + rowHeight); // Left border
@@ -295,7 +295,7 @@ export function generateOnboardCrewReportPDF(
                     "CrewName",
                     "JoinDate",
                     "Birthday",
-                    "SeamansBook",
+                    
                 ];
     
                 columnKeys.forEach((key, i) => {

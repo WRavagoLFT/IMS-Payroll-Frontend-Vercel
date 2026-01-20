@@ -31,7 +31,6 @@ import { ColumnDef } from "@tanstack/react-table";
 import { AddDeductionTypeDialog } from "@/components/dialogs/AddDeductionTypeDialog";
 import { EditDeductionTypeDialog } from "@/components/dialogs/EditDeductionTypeDialog";
 import Swal from "sweetalert2";
-// import { getCrewDeductionList } from "@/src/services/deduction/crewDeduction.api";
 import {
   DeductionDescriptionItem,
   deleteDeductionDescription,
@@ -39,21 +38,16 @@ import {
 } from "@/src/services/deduction/deductionDescription.api";
 
 export default function Deduction() {
-  // const [activeTab, setActiveTab] = useState("crew-deduction");
   const [searchTerm, setSearchTerm] = useState("");
-  // const [statusFilter, setStatusFilter] = useState("all");
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDeductionTypeDialogOpen, setAddDeductionTypeDialogOpen] =
     useState(false);
   const [selectedDeduction, setSelectedDeduction] =
     useState<DeductionDescriptionItem | null>(null);
-
   const [onSuccess, setOnSuccess] = useState(false);
-
   const [deductionDescriptionData, setDeductionDescriptionData] = useState<
     DeductionDescriptionItem[]
   >([]);
-
   const [typeFilter, setTypeFilter] = useState("all");
   const [currencyFilter, setCurrencyFilter] = useState("all");
 

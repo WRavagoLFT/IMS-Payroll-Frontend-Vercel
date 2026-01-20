@@ -55,8 +55,11 @@ export function generateAllotmentExcel(
   allotmentData: AllotmentRegisterData[],
   month: string,
   year: number,
-  globalExchangeRate: number
+  globalExchangeRate: number,
+  postedValue: number
 ): void {
+  const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+
   if (!allotmentData?.length) {
     console.warn("No allotment data available");
     return;
@@ -74,7 +77,7 @@ export function generateAllotmentExcel(
     wsData.push(["IMS PHILIPPINES"]);
     wsData.push(["MARITIME CORP."]);
     wsData.push([`${month.toUpperCase()} ${year}`]);
-    wsData.push(["ALLOTMENT PAYROLL REGISTER"]);
+    wsData.push([`ALLOTMENT PAYROLL REGISTER - ${postedStatus}`]);
     wsData.push(["VESSEL"]);
     wsData.push([`${vessel.VesselName} EXCHANGE RATE: USD 1.00 = PHP ${vessel.ExchangeRate}`]);
     wsData.push([formattedDate]);
@@ -191,7 +194,7 @@ export function generateAllotmentExcel(
   });
 
   const fileName = allotmentData.length > 1
-    ? `Allotment_ALL_${capitalizeFirstLetter(month)}-${year}.xlsx`
-    : `Allotment_${capitalizeFirstLetter(allotmentData[0].VesselName.replace(' ', '-'))}_${capitalizeFirstLetter(month)}-${year}.xlsx`;
+    ? `Allotment_ALL_${capitalizeFirstLetter(month)}-${year} - ${postedStatus}.xlsx`
+    : `Allotment_${capitalizeFirstLetter(allotmentData[0].VesselName.replace(' ', '-'))}_${capitalizeFirstLetter(month)}-${year} - ${postedStatus}.xlsx`;
   XLSX.writeFile(wb, fileName);
 }

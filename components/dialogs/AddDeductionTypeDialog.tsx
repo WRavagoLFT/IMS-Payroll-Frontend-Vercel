@@ -30,7 +30,6 @@ import { addDeductionDescription } from "@/src/services/deduction/deductionDescr
 import { toast } from "../ui/use-toast";
 import { AxiosError } from "axios";
 
-// Define the form schema with Zod
 const formSchema = z.object({
   deductionCode: z.string().min(1, "Deduction code is required"),
   deductionName: z.string().min(1, "Deduction name is required"),

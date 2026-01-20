@@ -1,10 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import PhilhealthContribution from "@/components/pages/PhilhealthContribution";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[5]}>
+    <Suspense fallback={<></>}>
       <PhilhealthContribution />
-    </AccessGuard>
+    </Suspense>
   );
 }

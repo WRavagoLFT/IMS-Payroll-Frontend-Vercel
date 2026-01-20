@@ -1,10 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import HMDFContribution from "@/components/pages/HDMFContributions";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[5]}>
+    <Suspense fallback={<></>}>
       <HMDFContribution />
-    </AccessGuard>
+    </Suspense>
   );
 }

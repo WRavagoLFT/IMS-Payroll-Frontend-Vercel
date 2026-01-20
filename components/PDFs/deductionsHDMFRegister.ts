@@ -3,7 +3,7 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import { addFont } from "./lib/font";
 import { logoBase64Image } from "./lib/base64items";
-import { capitalizeFirstLetter, formatCurrency, getMonthName, truncateText } from "@/lib/utils";
+import { capitalizeFirstLetter, formatCurrency, getMonthName } from "@/lib/utils";
 import { DeductionResponse, HDMFDeductionCrew } from "@/src/services/deduction/governmentReports.api";
 
 interface CrewMember {

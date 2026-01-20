@@ -19,9 +19,12 @@ function formatDateTimeUTC(date: Date): string {
 
 export function generatePayrollExcel(
   payslipData: PayslipData,
+  postedValue: number,
   currentUser: string = "admin",
-  vesselFilter?: number
+  vesselFilter?: number,
 ): boolean {
+  const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+
   if (typeof window === "undefined") {
     console.warn("Excel generation attempted during SSR");
     return false;
@@ -65,7 +68,7 @@ export function generatePayrollExcel(
         wsData.push(["IMS PHILIPPINES"]);
         wsData.push(["MARITIME CORP."]);
         wsData.push([periodMonthYear]);
-        wsData.push(["PAYROLL STATEMENT"]);
+        wsData.push([`PAYROLL STATEMENT - ${postedStatus}`]);
         wsData.push([]);
         wsData.push(["CREW"]);
         wsData.push([`${crew.rank} / ${crew.crewName}`]);
@@ -128,14 +131,22 @@ export function generatePayrollExcel(
         wsData.push([`Current User's Login: ${currentUser}`]);
         wsData.push(["(This is a system generated document and does not require signature)"]);
 
-        // Create worksheet and auto-width
         const ws = XLSX.utils.aoa_to_sheet(wsData);
 
+        // Auto column width (general)
         const colWidths = wsData[0].map((_, colIndex: number) => {
+          // Default auto width
           const maxLength = wsData.reduce((max, row) => {
             const val = row[colIndex] ? row[colIndex].toString() : "";
-            return Math.max(max, val.length + 2); // general padding
+            return Math.max(max, val.length + 5);
           }, 10);
+
+          // Force much wider columns for: CURRENCY, AMOUNT, FOREX, PESO
+          if (colIndex === 1) return { wch: 30 }; // CURRENCY
+          if (colIndex === 2) return { wch: 25 }; // AMOUNT
+          if (colIndex === 3) return { wch: 25 }; // FOREX
+          if (colIndex === 4) return { wch: 25 }; // PESO
+
           return { wch: maxLength };
         });
 
@@ -150,9 +161,9 @@ export function generatePayrollExcel(
     //const fileName = `payroll-crewwise-${payslipData.period.formattedPeriod.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.xlsx`;
     let fileName = ""
     if (payslipData.vessels.length === 1) {
-        fileName = `Payroll_${capitalizeFirstLetter(payslipData.vessels[0].vesselName.replace(' ', '-'))}_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year}.xlsx`
+        fileName = `Payroll_${capitalizeFirstLetter(payslipData.vessels[0].vesselName.replace(' ', '-'))}_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year}- ${postedStatus}.xlsx`
     } else {
-        fileName = `Payroll_ALL_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year}.xlsx`;
+        fileName = `Payroll_ALL_${capitalizeFirstLetter(getMonthName(payslipData.period.month))}-${payslipData.period.year}- ${postedStatus}.xlsx`;
     }
     XLSX.writeFile(workbook, fileName);
     return true;

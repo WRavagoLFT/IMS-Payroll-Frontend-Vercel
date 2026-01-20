@@ -5,9 +5,7 @@ import 'jspdf-autotable';
 import { addFont } from "./lib/font";
 import { logoBase64Image } from "./lib/base64items";
 import { capitalizeFirstLetter, truncateText } from "@/lib/utils";
-import { getMonth } from "date-fns";
 
-// Define interfaces based on your actual data structure
 export interface Deductions {
     Name: string;
     Amount: number;

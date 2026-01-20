@@ -1,13 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
-import DeductionEntries from "@/components/pages/DeductionEntries";
 import { Suspense } from "react";
+import DeductionEntries from "@/components/pages/DeductionEntries";
 
-export default function page() {
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3]}>
-      <Suspense fallback={<div>Loading...</div>}>
-        <DeductionEntries />;
-      </Suspense>
-    </AccessGuard>
+    <Suspense fallback={<></>}>
+      <DeductionEntries />
+    </Suspense>
   );
 }

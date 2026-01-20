@@ -60,8 +60,7 @@ import {
 } from "@/src/services/vessel/vesselPrincipal.api";
 import { NewVesselItem, UpdatedVesselFromApi } from "@/types/vessel";
 import generateOnboardCrewReport from "../PDFs/onboardCrewReportPDF";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface Vessel {
   vesselId: number;

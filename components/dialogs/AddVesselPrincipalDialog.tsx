@@ -24,7 +24,6 @@ import { useState } from "react";
 import { AxiosError } from "axios"; 
 import { Plus } from "lucide-react";
 
-// Define form schema with Zod - both fields are required
 const formSchema = z.object({
   principalCode: z.string().min(1, "Principal Code is required"),
   principalName: z.string().min(1, "Principal Name is required"),

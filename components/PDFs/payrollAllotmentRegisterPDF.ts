@@ -4,7 +4,7 @@ import { jsPDF } from "jspdf";
 import 'jspdf-autotable';
 import { addFont } from "./lib/font";
 import { logoBase64Image } from "./lib/base64items";
-import { capitalizeFirstLetter, getMonthName, truncateText } from "@/lib/utils";
+import { capitalizeFirstLetter } from "@/lib/utils";
 
 // Define interfaces based on your updated data structure
 export interface Allottee {
@@ -81,7 +81,10 @@ export function generateAllotmentPayrollRegister(
     month: string,
     year: number,
     exchangeRate: number,
+    postedValue: number
 ): boolean {
+    const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+
     if (typeof window === 'undefined') {
         console.warn('PDF generation attempted during server-side rendering');
         return false;
@@ -111,7 +114,7 @@ export function generateAllotmentPayrollRegister(
 
         // Set document properties
         doc.setProperties({
-            title: `Allotment Payroll Register - ${month} ${year}`,
+            title: `Allotment Payroll Register - ${month} ${year} - ${postedStatus}`,
             subject: `Allotment Payroll Register`,
             author: 'IMS Philippines Maritime Corp.',
             creator: 'jsPDF'
@@ -280,6 +283,8 @@ export function generateAllotmentPayrollRegister(
             // Vertical line for right column
             doc.setDrawColor(0);
             doc.setLineWidth(0.1);
+            doc.setFont('NotoSans', 'normal');
+            doc.text(`${postedStatus}`, margins.left + 2, vesselInfoY + 13.5);
             doc.line(margins.left + companyColWidth + middleColWidth, vesselInfoY, margins.left + companyColWidth + middleColWidth, vesselInfoY + vesselInfoHeight);
 
             // IMPORTANT: Add horizontal line between exchange rate and date
@@ -500,7 +505,7 @@ export function generateAllotmentPayrollRegister(
         }
         // Save the final PDF
         const fileName = vesselData.length > 1
-                            ? `Allotment_ALL_${capitalizeFirstLetter(month)}-${year}.pdf`
+                            ? `Allotment_ALL_${capitalizeFirstLetter(month)}-${year} - ${postedStatus}.pdf`
                             : `Allotment_${capitalizeFirstLetter(vesselData[0].VesselName.replace(' ', '-'))}_${capitalizeFirstLetter(month)}-${year}.pdf`;
         doc.save(fileName)
 
@@ -511,26 +516,13 @@ export function generateAllotmentPayrollRegister(
     }
 }
 
-// Helper function to convert data URI to Blob
-function dataURItoBlob(dataURI: string): Blob {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
-    const ab = new ArrayBuffer(byteString.length);
-    const ia = new Uint8Array(ab);
-
-    for (let i = 0; i < byteString.length; i++) {
-        ia[i] = byteString.charCodeAt(i);
-    }
-
-    return new Blob([ab], { type: mimeString });
-}
-
 // Example usage function
 export function generateAllotmentPDF(
     allotmentData: AllotmentRegisterData[],
     month: string,
     year: number,
     exchangeRate: number,
+    postedValue: number
 ): void {
-    generateAllotmentPayrollRegister(allotmentData, month, year, exchangeRate);
+    generateAllotmentPayrollRegister(allotmentData, month, year, exchangeRate, postedValue);
 }

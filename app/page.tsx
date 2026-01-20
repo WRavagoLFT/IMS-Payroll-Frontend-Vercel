@@ -1,32 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Login from "@/components/Login";
-import { useAuth } from "@/src/store/useAuthStore";
 import Image from "next/image";
 import { Loader } from "lucide-react";
 
 export default function Home() {
   const router = useRouter();
-  const { user, loading, initialized } = useAuth();
-
-  // useEffect(() => {
-  //   if (initialized && user) {
-  //     router.replace("/home/dashboard");
-  //   }
-  // }, [initialized, user]);
-
-  if (!initialized || loading || user) {
-    return (
-      <div className="flex flex-col justify-center items-center h-screen gap-2 text-gray-700">
-        <Loader className="animate-spin w-6 h-6" />
-        <span>Loading...</span>
-      </div>
-    );
-  }
-
   return (
+
     <main className="flex h-screen relative">
       <div className="hidden lg:block lg:w-3/4 bg-[#1e2f8d] relative pl-5">
         <Image

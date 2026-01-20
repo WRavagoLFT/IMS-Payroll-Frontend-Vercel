@@ -1,9 +1,10 @@
-import AccessGuard from "@/components/pages/AccessGuard";
+import { Suspense } from "react";
 import RemittanceDetails from "@/components/pages/RemittanceDetails";
-export default function page() {
+
+export default function Page() {
   return (
-    <AccessGuard allowedTypes={[3]}>
+    <Suspense fallback={<></>}>
       <RemittanceDetails />
-    </AccessGuard>
+    </Suspense>
   );
 }

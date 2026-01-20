@@ -19,7 +19,6 @@ import { Input } from "./ui/input";
 import {
   loginUser,
   LoginResponse,
-  getCurrentUser,
 } from "../src/services/auth/auth.api";
 import { PiEye, PiEyeSlash } from "react-icons/pi";
 import {
@@ -31,8 +30,8 @@ import {
 } from "@/components/ui/dialog";
 import { DialogClose, DialogTitle } from "@radix-ui/react-dialog";
 import Image from "next/image";
-import { AxiosError } from "axios";
-import { useAuth } from "@/src/store/useAuthStore";
+import { toast } from "./ui/use-toast";
+import { useAuth } from "@/src/store/useAuth";
 
 const formSchema = z.object({
   email: z.string().email({
@@ -48,6 +47,7 @@ export default function Login() {
   const [errorMessage, setErrorMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,43 +57,66 @@ export default function Login() {
     },
   });
 
+  // Handle submit
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setErrorMessage("");
 
     try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+        credentials: "include",
+      });
+
+      const cookieResponse = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          console.warn("Invalid credentials");
+          throw new Error("Invalid credentials, please check your email and password.");
+        } else if (res.status === 400) {
+          console.error("Server error during login");
+          throw new Error("Invalid credentials, please check your email and password.");
+        } else if (res.status === 500) {
+          console.error("Server error during login");
+          throw new Error("Internal server error. Please try again later or contact support.");
+        } else {
+          console.error("Unexpected error:", cookieResponse?.message);
+          throw new Error(cookieResponse?.message || "An unexpected error occurred.");
+        }
+      }
+
       const response: LoginResponse = await loginUser(values);
 
-      if (response.success) {
-        localStorage.setItem("userEmail", response.data.email); // session ONLY.
+      setUser({
+        email: response.data.email,
+        userType: response.data.userType,
+      });
 
-        const currentUser = await getCurrentUser();
-        if (currentUser) {
-          useAuth.getState().setUser(currentUser);
-        }
+      toast({
+        title: "Login Successful",
+        variant: "success",
+        description: `Welcome back, ${response.data.email || "User"}!`,
+      });
 
-        router.push("/home/dashboard");
-      } else {
-        setErrorMessage(
-          response.message || "Invalid credentials, please try again."
-        );
-      }
+      router.push("/home/dashboard");
+
     } catch (error: unknown) {
-      const axiosError = error as AxiosError;
+      const message =
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred. Please try again later.";
 
-      if (axiosError?.response?.status === 401) {
-        setErrorMessage(
-          "Invalid credentials, please check your email and password."
-        );
-      } else if (axiosError?.response?.status === 500) {
-        setErrorMessage(
-          "Internal server error. Please try again later or contact support."
-        );
-      } else {
-        setErrorMessage(
-          "An unexpected error occurred. Please try again later."
-        );
-      }
+      setErrorMessage(message);
+
+      toast({
+        title: "Error",
+        variant: "destructive",
+        description: message,
+      });
+
     } finally {
       setIsLoading(false);
     }
@@ -117,21 +140,19 @@ export default function Login() {
                   render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel
-                        className={`text-sm ${
-                          fieldState.error ? "text-red-600" : ""
-                        }`}
+                        className={`text-sm ${fieldState.error ? "text-red-600" : ""
+                          }`}
                       >
                         Email Address
                       </FormLabel>
                       <FormControl>
                         <Input
-                            type="text" 
-                            placeholder="Enter email address"
-                            {...field}
-                            className={`h-10 text-sm pr-12 ${
-                              fieldState.error
-                                ? "border-red-500 ring-red-500 focus-visible:ring-red-200 focus-visible:border-red-500"
-                                : ""
+                          type="text"
+                          placeholder="Enter email address"
+                          {...field}
+                          className={`h-10 text-sm pr-12 ${fieldState.error
+                              ? "border-red-500 ring-red-500 focus-visible:ring-red-200 focus-visible:border-red-500"
+                              : ""
                             }`}
                         />
                       </FormControl>
@@ -147,9 +168,8 @@ export default function Login() {
                   render={({ field, fieldState }) => (
                     <FormItem>
                       <FormLabel
-                        className={`text-sm ${
-                          fieldState.error ? "text-red-600" : ""
-                        }`}
+                        className={`text-sm ${fieldState.error ? "text-red-600" : ""
+                          }`}
                       >
                         Password
                       </FormLabel>
@@ -159,11 +179,10 @@ export default function Login() {
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter password"
                             {...field}
-                            className={`h-10 text-sm pr-12 ${
-                              fieldState.error
+                            className={`h-10 text-sm pr-12 ${fieldState.error
                                 ? "border-red-500 ring-red-500 focus-visible:ring-red-200 focus-visible:border-red-500"
                                 : ""
-                            }`}
+                              }`}
                           />
                           <button
                             type="button"
@@ -184,14 +203,15 @@ export default function Login() {
                 />
               </div>
 
-              {/* Display error message if any */}
+              {/* Display error message if any
               {errorMessage && (
                 <div className="text-sm text-red-500 text-center">
                   {errorMessage}
                 </div>
-              )}
+              )} */}
 
               <Button
+                suppressHydrationWarning
                 type="submit"
                 className="w-full h-10 text-sm bg-[#1e2f8d] hover:bg-[#1e2f8d]/90"
                 disabled={isLoading}

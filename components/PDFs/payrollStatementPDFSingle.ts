@@ -51,9 +51,12 @@ export function generatePayrollPDFSingle(
     payslipData: CrewPayroll,
     month: number,
     year: number,
+    postedValue: number,
     currentUser: string = 'admin',
     downloadImmediate: boolean = true,
 ): boolean | Promise<{blob: Blob, filename: string}> {
+    const postedStatus = postedValue === 1 ? "Posted" : "Unposted";
+
     if (typeof window === 'undefined') {
         console.warn('PDF generation attempted during server-side rendering');
         return false;
@@ -83,7 +86,7 @@ export function generatePayrollPDFSingle(
 
         doc.setProperties({
             title: pdfTitle,
-            subject: `Payroll Statement for ${payslipData.crewName}`,
+            subject: `Payroll Statement for ${payslipData.crewName} - ${postedStatus}`,
             author: 'IMS Philippines Maritime Corp.',
             creator: 'jsPDF'
         });
@@ -98,7 +101,7 @@ export function generatePayrollPDFSingle(
 
         const displayMonth = monthName ?? MONTH_NAMES[month - 1];
 
-        generateCrewPayrollPage(doc, dateFormat, payslipData.vesselName, payslipData, currentUser, displayMonth, year);
+        generateCrewPayrollPage(doc, dateFormat, payslipData.vesselName, payslipData, currentUser, displayMonth, year, postedStatus);
         // If no pages were generated, return false
         // if (firstPage) {
         //     toast({
@@ -112,7 +115,7 @@ export function generatePayrollPDFSingle(
         // Generate filename based on selected vessels
         let fileName: string;
         
-        fileName = `Payslip-${payslipData.crewName.replace(/[^\w\s]/g, '').replace(/\s+/g, '-')}_${displayMonth}-${year}.pdf`
+        fileName = `Payslip-${payslipData.crewName.replace(/[^\w\s]/g, '').replace(/\s+/g, '-')}_${displayMonth}-${year} - ${postedStatus}.pdf`
 
         // Save the combined PDF
         if(downloadImmediate){
@@ -142,6 +145,7 @@ function generateCrewPayrollPage(
     currentUser: string,
     displayMonth: string,
     year: number,
+    postedStatus: string
 ) {
     // Define page dimensions
     const pageWidth = doc.internal.pageSize.width;
@@ -174,8 +178,15 @@ function generateCrewPayrollPage(
     //doc.text(displayMonth, year, pageWidth - 55, y + 9);
 
     // Add payroll statement box
-    doc.rect(pageWidth - 60, y + 15, 50, 15);
-    doc.text("PAYROLL STATEMENT", pageWidth - 55, y + 23);
+    doc.rect(pageWidth - 60, y + 15 , 50, 15);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.text("PAYROLL STATEMENT", pageWidth - 55, y + 22);
+
+    // Add posted/unposted status just below with moderate spacing
+    doc.setFont('NotoSans', 'normal');
+    doc.setFontSize(7);
+    doc.text(postedStatus, pageWidth - 55, y + 26.5); // slightly below the title
 
     // Add crew and vessel information
     y += 30;

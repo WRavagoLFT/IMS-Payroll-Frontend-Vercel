@@ -37,7 +37,6 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { RiShieldStarLine } from "react-icons/ri";
 import { AddRemittanceDialog } from "@/components/dialogs/AddRemittanceDialog";
-// import { Checkbox } from "@/components/ui/checkbox";
 import {
   getCrewRemittanceDetails,
   getCrewRemittanceList,
